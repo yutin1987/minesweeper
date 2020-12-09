@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minesweeper</title>
+  </head>
+  <body>
+    <div class="page">
+      <div class="page__menu-side page__menu-side--open">
+        <nav class="nav">
+          <div>
+            <h3>Level</h3>
+            <div class="radio-button">
+              <input id="map-size__small" class="radio-button__input" type="radio" name="map-size" value="small" checked="true" />
+              <label for="map-size__small" class="radio-button__label">Small</label>
+            </div>
+            <div class="radio-button">
+              <input id="map-size__medium" class="radio-button__input" type="radio" name="map-size" value="medium" />
+              <label for="map-size__medium" class="radio-button__label">Medium</label>
+            </div>
+            <div class="radio-button">
+              <input id="map-size__large" class="radio-button__input" type="radio" name="map-size" value="large" />
+              <label for="map-size__large" class="radio-button__label">Large</label>
+            </div>
+          </div>
+          <div class="game-stats">
+            <div class="game-stats--half">
+              <h3>Mines</h3>
+              <span id="mines-hidden" class="counter">00</span>
+            </div>
+          </div>
+
+          <div>
+            <button id="reset" class="button" type="button" name="button">Reset</button>
+          </div>
+
+          <div>
+            <ul class="legend">
+              <li class="legend__item"><span>Left-click</span> to reveal it.</li>
+              <li class="legend__item"><span>Right-click</span> to flag it.</li>
+              <li class="legend__item"><span>1, 2, 3</span> to change levels.</li>
+              <li class="legend__item"><span>R</span> to reset.</li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+      <div class="page__map-side">
+        <div class="minesweeper"></div>
+        <div class="victory-modal">
+          <p>👻 🏆 👻</p>
+        </div>
+      </div>
+    </div>
+    <script src="main.js"></script>
+  </body>
+</html>
