@@ -1,12 +1,13 @@
 import _ from 'lodash';
 import $ from 'jquery';
+import generateMinePositions from './generateMinePositions';
+import generateMapValue from './generateMapValue';
+import getElementPosition from './getElementPosition';
 
 const BLOCK_CLASSES = {
   BASE: 'minesweeper__block',
   STATES: {
     OPEN: 'minesweeper__block--open',
-    RED: 'minesweeper__block--red',
-    GREEN: 'minesweeper__block--green',
     FLAG: 'minesweeper__block--flag',
     BOMB: 'minesweeper__block--bomb',
     FIRST_BOMB: 'minesweeper__block--first-bomb',
@@ -32,86 +33,6 @@ const levels = {
   },
 };
 
-/**
- * @param {number} rows number of rows
- * @param {number} columns number of columns
- * @param {number} totalMines total of mines
- * @param {string} excludePosition position for first click
- */
-function generateMinePositions(rows, columns, totalMines, excludePosition) {
-  const minePositions = [];
-
-  while (minePositions.length < totalMines) {
-    const r = _.random(rows - 1);
-    const c = _.random(columns - 1);
-    const pos = `r${r}c${c}`;
-    if (pos !== excludePosition && minePositions.indexOf(pos) === -1) {
-      minePositions.push(pos);
-    }
-  }
-  return minePositions;
-}
-
-/**
- * @param {number} rows number of rows
- * @param {number} columns number of columns
- * @param {array} minePositions array of mine positions
- */
-function generateMap(rows, columns, minePositions) {
-  const map = [];
-
-  // Creates map with mines
-  for (let r = 0; r < rows; r += 1) {
-    map[r] = [];
-    for (let c = 0; c < columns; c += 1) {
-      map[r][c] = minePositions.indexOf(`r${r}c${c}`) !== -1 ? '*' : '0';
-    }
-  }
-
-  let total = 0;
-  for (let r = 0; r < rows; r += 1) {
-    for (let c = 0; c < columns; c += 1) {
-      if (map[r][c] !== '*') {
-        total = 0;
-
-        if (r > 0) {
-          // Top left element
-          if (map[r - 1][c - 1] === '*') total += 1;
-          // Top element
-          if (map[r - 1][c] === '*') total += 1;
-          // Top right element
-          if (map[r - 1][c + 1] === '*') total += 1;
-        }
-        // Left element
-        if (map[r][c - 1] === '*') total += 1;
-        // Right element
-        if (map[r][c + 1] === '*') total += 1;
-        if (r < rows - 1) {
-          // Bottom left element
-          if (map[r + 1][c - 1] === '*') total += 1;
-          // Bottom element
-          if (map[r + 1][c] === '*') total += 1;
-          // Bottom right element
-          if (map[r + 1][c + 1] === '*') total += 1;
-        }
-
-        map[r][c] = total;
-      }
-    }
-  }
-
-  return map;
-}
-
-/**
- * @param {element} block element of block
- */
-function getElementPosition(block) {
-  const position = $(block).data('position');
-  const r = position.substring(1, position.indexOf('c'));
-  const c = position.substring(position.indexOf('c') + 1, position.length);
-  return { row: Number(r), column: Number(c) };
-}
 export default class MapBuilder {
   constructor(level = 'medium') {
     this.level = level;
@@ -160,7 +81,7 @@ export default class MapBuilder {
     }
   }
 
-  generateMap(excludeBlock) {
+  generateMapValue(excludeBlock) {
     this.minePositions = generateMinePositions(
       levels[this.level].rows,
       levels[this.level].columns,
@@ -168,7 +89,7 @@ export default class MapBuilder {
       excludeBlock.data('position'),
     );
 
-    this.map = generateMap(
+    this.map = generateMapValue(
       levels[this.level].rows,
       levels[this.level].columns,
       this.minePositions,
@@ -179,11 +100,11 @@ export default class MapBuilder {
   }
 
   onBlockClick(block) {
-    if (this.map === null) this.generateMap(block);
+    if (this.map === null) this.generateMapValue(block);
 
     if (
-      $(block).hasClass(BLOCK_CLASSES.STATES.OPEN)
-      || $(block).hasClass(BLOCK_CLASSES.STATES.FLAG)
+      block.hasClass(BLOCK_CLASSES.STATES.OPEN)
+      || block.hasClass(BLOCK_CLASSES.STATES.FLAG)
       || this.gameOver === true
     ) return;
 
@@ -197,7 +118,7 @@ export default class MapBuilder {
     if (block.hasClass(BLOCK_CLASSES.STATES.OPEN) || this.gameOver) return;
 
     if (block.hasClass(BLOCK_CLASSES.STATES.FLAG)) {
-      block.find('span').remove();
+      block.empty();
       block.removeClass(BLOCK_CLASSES.STATES.FLAG);
       this.minesHidden += 1;
       this.minesHiddenNode.text(this.minesHidden);
@@ -207,7 +128,7 @@ export default class MapBuilder {
     if (this.minesHidden < 1) return;
 
     $('<span>🚩</span>').appendTo(block);
-    $(block).addClass(BLOCK_CLASSES.STATES.FLAG);
+    block.addClass(BLOCK_CLASSES.STATES.FLAG);
     this.minesHidden -= 1;
     this.minesHiddenNode.text(this.minesHidden);
   }
@@ -229,7 +150,9 @@ export default class MapBuilder {
     }
 
     this.lastBlocks -= 1;
+    block.removeClass(BLOCK_CLASSES.STATES.FLAG);
     block.addClass(BLOCK_CLASSES.STATES.OPEN);
+    block.empty();
 
     if (blockValue > 0) {
       // Setting the color
@@ -239,7 +162,7 @@ export default class MapBuilder {
         block.addClass(BLOCK_CLASSES.STATES.RED);
       }
 
-      $(`<span>${blockValue}<span>`).appendTo(block);
+      $(`<span class="tip">${blockValue}</span>`).appendTo(block);
       this.checkVictory();
       return;
     }

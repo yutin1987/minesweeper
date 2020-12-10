@@ -4,7 +4,7 @@ import './assets/normalize.css';
 import './assets/index.css';
 import 'core-js/stable';
 import Mousetrap from 'mousetrap';
-import MapBuilder from './map-builder';
+import MapBuilder from './MapBuilder';
 
 /**
  * Create a new map

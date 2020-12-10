@@ -3,8 +3,14 @@
     "browser": true,
     "es2021": true
   },
+  "plugins": [
+    "jest",
+    "cypress"
+  ],
   "extends": [
-    "airbnb-base"
+    "airbnb-base",
+    "plugin:cypress/recommended",
+    "plugin:jest/recommended"
   ],
   "parserOptions": {
     "ecmaVersion": 12,
